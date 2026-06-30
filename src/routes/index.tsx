@@ -4,6 +4,7 @@ import { Upload, FileText, Settings2, Play, Sparkles } from "lucide-react";
 import { runPipeline, type StageEvent } from "@/lib/pipeline";
 import type { PipelineResult, ProjectionConfig } from "@/lib/pipeline/types";
 import { ALL_CANONICAL_FIELDS, DEFAULT_PROJECTION } from "@/lib/pipeline/types";
+import { project } from "@/lib/pipeline/projector";
 import { ResultsView } from "@/components/results-view";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { toast } from "sonner";
@@ -179,9 +180,6 @@ function Index() {
 }
 
 function applyProjection(result: PipelineResult, cfg: ProjectionConfig) {
-  // Re-use projector pure function.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { project } = require("@/lib/pipeline/projector") as typeof import("@/lib/pipeline/projector");
   return project(result.canonical, result.provenance, cfg);
 }
 
