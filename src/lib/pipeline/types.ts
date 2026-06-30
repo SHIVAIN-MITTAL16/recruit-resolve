@@ -23,12 +23,14 @@ export interface FieldEvidence<T> {
   raw?: string;
 }
 
-/** A resolved field with provenance: the chosen value plus every contender. */
+/** A resolved field with provenance: the chosen value plus every contender.
+ *  Candidates may be per-item evidence (skills/experience) so we leave them
+ *  untyped — the UI introspects them generically. */
 export interface ResolvedField<T> {
   value: T | null;
   confidence: number;
   chosen: FieldEvidence<T> | null;
-  candidates: FieldEvidence<T>[];
+  candidates: FieldEvidence<unknown>[];
   /** Human-readable reason the chosen value won. */
   reason: string;
 }
