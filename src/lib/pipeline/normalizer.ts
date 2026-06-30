@@ -55,10 +55,7 @@ export function normalizePhone(
   const trimmed = raw.trim();
   if (trimmed !== raw) steps.push("whitespace:trim");
   try {
-    const parsed = parsePhoneNumberFromString(
-      trimmed,
-      (defaultCountry ?? "US") as "US",
-    );
+    const parsed = parsePhoneNumberFromString(trimmed, (defaultCountry ?? "US") as "US");
     if (parsed && parsed.isValid()) {
       steps.push("phone:E164");
       return { value: parsed.number, steps, valid: true };
@@ -189,11 +186,30 @@ export function normalizeDate(raw: string | undefined): Normalized<string> {
   }
   // Month YYYY (e.g. "Jan 2023", "January 2023")
   const months: Record<string, string> = {
-    jan: "01", january: "01", feb: "02", february: "02",
-    mar: "03", march: "03", apr: "04", april: "04",
-    may: "05", jun: "06", june: "06", jul: "07", july: "07",
-    aug: "08", august: "08", sep: "09", sept: "09", september: "09",
-    oct: "10", october: "10", nov: "11", november: "11", dec: "12", december: "12",
+    jan: "01",
+    january: "01",
+    feb: "02",
+    february: "02",
+    mar: "03",
+    march: "03",
+    apr: "04",
+    april: "04",
+    may: "05",
+    jun: "06",
+    june: "06",
+    jul: "07",
+    july: "07",
+    aug: "08",
+    august: "08",
+    sep: "09",
+    sept: "09",
+    september: "09",
+    oct: "10",
+    october: "10",
+    nov: "11",
+    november: "11",
+    dec: "12",
+    december: "12",
   };
   m = /^([a-z]+)\.?\s+(\d{4})$/.exec(v);
   if (m && months[m[1]]) {

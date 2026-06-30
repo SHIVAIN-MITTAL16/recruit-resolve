@@ -163,7 +163,8 @@ function pickCompany(
 ): { resolved: ResolvedField<string>; decision: MergeDecision } {
   // Find newest dated company from resume experience.
   const newest = [...pdfExperience].sort((a, b) => {
-    const score = (e?: string) => (e === "present" ? 9e9 : Number((e ?? "0000-00").replace("-", "")));
+    const score = (e?: string) =>
+      e === "present" ? 9e9 : Number((e ?? "0000-00").replace("-", ""));
     return score(b.value.endDate) - score(a.value.endDate);
   })[0];
   const cands = present(csv, pdf);
@@ -269,7 +270,7 @@ export function mergeRecords(
   pdf: ExtractedRecord | null,
 ): MergeOutput & { duplicateSkillsRemoved: number } {
   const decisions: MergeDecision[] = [];
-  const push = <T,>(r: { resolved: ResolvedField<T>; decision: MergeDecision }) => {
+  const push = <T>(r: { resolved: ResolvedField<T>; decision: MergeDecision }) => {
     decisions.push(r.decision);
     return r.resolved;
   };
@@ -281,7 +282,9 @@ export function mergeRecords(
   const currentCompany = push(
     pickCompany(csv?.currentCompany, pdf?.currentCompany, pdf?.experience ?? []),
   );
-  const currentTitle = push(pickByPolicy("currentTitle", csv?.currentTitle, pdf?.currentTitle, "csv-first"));
+  const currentTitle = push(
+    pickByPolicy("currentTitle", csv?.currentTitle, pdf?.currentTitle, "csv-first"),
+  );
 
   const skillsResult = unionSkills(csv?.skills ?? [], pdf?.skills ?? []);
   decisions.push(skillsResult.decision);
@@ -290,7 +293,8 @@ export function mergeRecords(
   const expEv = pdf?.experience ?? [];
   const experience: ResolvedField<ExperienceItem[]> = {
     value: expEv.map((e) => e.value),
-    confidence: expEv.length > 0 ? expEv.reduce((s, e) => s + e.baseConfidence, 0) / expEv.length : 0,
+    confidence:
+      expEv.length > 0 ? expEv.reduce((s, e) => s + e.baseConfidence, 0) / expEv.length : 0,
     chosen: null,
     candidates: expEv,
     reason: "resume is the only authoritative source for work history",
@@ -307,7 +311,8 @@ export function mergeRecords(
   const eduEv = pdf?.education ?? [];
   const education: ResolvedField<EducationItem[]> = {
     value: eduEv.map((e) => e.value),
-    confidence: eduEv.length > 0 ? eduEv.reduce((s, e) => s + e.baseConfidence, 0) / eduEv.length : 0,
+    confidence:
+      eduEv.length > 0 ? eduEv.reduce((s, e) => s + e.baseConfidence, 0) / eduEv.length : 0,
     chosen: null,
     candidates: eduEv,
     reason: "resume is the only authoritative source for education",

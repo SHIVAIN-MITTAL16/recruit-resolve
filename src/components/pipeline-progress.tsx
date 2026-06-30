@@ -35,8 +35,8 @@ export function PipelineProgress({ stages }: { stages: StageEvent[] }) {
                 st === "active"
                   ? "bg-muted text-foreground"
                   : st === "done"
-                  ? "text-foreground"
-                  : "text-muted-foreground"
+                    ? "text-foreground"
+                    : "text-muted-foreground"
               }`}
             >
               <span className="grid h-5 w-5 place-items-center">

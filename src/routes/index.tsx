@@ -47,9 +47,8 @@ function Index() {
     setStages([]);
     setResult(null);
     try {
-      const r = await runPipeline(
-        { csv: csv ?? undefined, pdf: pdf ?? undefined, config },
-        (e) => setStages((prev) => [...prev, e]),
+      const r = await runPipeline({ csv: csv ?? undefined, pdf: pdf ?? undefined, config }, (e) =>
+        setStages((prev) => [...prev, e]),
       );
       setResult(r);
       toast.success(
@@ -184,7 +183,12 @@ function applyProjection(result: PipelineResult, cfg: ProjectionConfig) {
 }
 
 function FileCard({
-  icon, title, hint, accept, file, onFile,
+  icon,
+  title,
+  hint,
+  accept,
+  file,
+  onFile,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -195,7 +199,9 @@ function FileCard({
 }) {
   return (
     <label className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-border bg-card p-6 transition-colors hover:border-foreground/20">
-      <div className="flex items-center gap-2 text-sm font-medium">{icon} {title}</div>
+      <div className="flex items-center gap-2 text-sm font-medium">
+        {icon} {title}
+      </div>
       <p className="text-xs text-muted-foreground">{hint}</p>
       <div className="mt-1 rounded-md border border-dashed border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground transition-colors group-hover:border-foreground/30">
         {file ? (
@@ -215,8 +221,12 @@ function FileCard({
 }
 
 function ConfigCard({
-  config, onChange,
-}: { config: ProjectionConfig; onChange: (c: ProjectionConfig) => void }) {
+  config,
+  onChange,
+}: {
+  config: ProjectionConfig;
+  onChange: (c: ProjectionConfig) => void;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-center gap-2 text-sm font-medium">
@@ -231,14 +241,15 @@ function ConfigCard({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {ALL_CANONICAL_FIELDS.map((f) => {
-            const active =
-              config.includeFields.length === 0 || config.includeFields.includes(f);
+            const active = config.includeFields.length === 0 || config.includeFields.includes(f);
             return (
               <button
                 key={f}
                 onClick={() => {
                   const base =
-                    config.includeFields.length === 0 ? [...ALL_CANONICAL_FIELDS] : [...config.includeFields];
+                    config.includeFields.length === 0
+                      ? [...ALL_CANONICAL_FIELDS]
+                      : [...config.includeFields];
                   const next = active ? base.filter((x) => x !== f) : [...base, f];
                   onChange({ ...config, includeFields: next });
                 }}

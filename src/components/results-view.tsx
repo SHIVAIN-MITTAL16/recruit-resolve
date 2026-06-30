@@ -6,7 +6,10 @@ import { toast } from "sonner";
 type Tab = "overview" | "decisions" | "provenance" | "json" | "report";
 
 export function ResultsView({
-  result, config, onConfigChange, onReset,
+  result,
+  config,
+  onConfigChange,
+  onReset,
 }: {
   result: PipelineResult;
   config: ProjectionConfig;
@@ -32,8 +35,8 @@ export function ResultsView({
         </button>
         <div className="text-xs text-muted-foreground">
           {result.report.durationMs} ms · {result.report.counts.fieldsExtracted} fields extracted ·{" "}
-          {result.report.counts.mergeAgreements} agreements ·{" "}
-          {result.report.counts.mergeConflicts} conflicts
+          {result.report.counts.mergeAgreements} agreements · {result.report.counts.mergeConflicts}{" "}
+          conflicts
         </div>
       </div>
 
@@ -72,7 +75,9 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-border p-4">
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-1 text-sm font-medium">{value || <span className="text-muted-foreground">—</span>}</div>
+      <div className="mt-1 text-sm font-medium">
+        {value || <span className="text-muted-foreground">—</span>}
+      </div>
     </div>
   );
 }
@@ -102,11 +107,7 @@ function Overview({ result }: { result: PipelineResult }) {
         />
         <Stat
           label="Education"
-          value={
-            c.education.length > 0
-              ? c.education.map((e) => e.institution).join(" · ")
-              : null
-          }
+          value={c.education.length > 0 ? c.education.map((e) => e.institution).join(" · ") : null}
         />
       </div>
     </div>
@@ -227,7 +228,9 @@ function Provenance({ result }: { result: PipelineResult }) {
 }
 
 function JsonView({
-  result, config, onConfigChange,
+  result,
+  config,
+  onConfigChange,
 }: {
   result: PipelineResult;
   config: ProjectionConfig;
@@ -322,19 +325,25 @@ function Report({ result }: { result: PipelineResult }) {
 
       <Section title="Invalid emails" empty="None">
         {r.invalid.emails.map((e, i) => (
-          <div key={i} className="font-mono text-xs">{e}</div>
+          <div key={i} className="font-mono text-xs">
+            {e}
+          </div>
         ))}
       </Section>
       <Section title="Invalid phones" empty="None">
         {r.invalid.phones.map((p, i) => (
-          <div key={i} className="font-mono text-xs">{p}</div>
+          <div key={i} className="font-mono text-xs">
+            {p}
+          </div>
         ))}
       </Section>
 
       {!r.validation.ok && (
         <Section title="Validation issues" empty="None">
           {r.validation.issues.map((i, idx) => (
-            <div key={idx} className="font-mono text-xs text-amber-600">{i}</div>
+            <div key={idx} className="font-mono text-xs text-amber-600">
+              {i}
+            </div>
           ))}
         </Section>
       )}
@@ -343,8 +352,14 @@ function Report({ result }: { result: PipelineResult }) {
 }
 
 function Section({
-  title, empty, children,
-}: { title: string; empty: string; children: React.ReactNode }) {
+  title,
+  empty,
+  children,
+}: {
+  title: string;
+  empty: string;
+  children: React.ReactNode;
+}) {
   const arr = Array.isArray(children) ? children : [children];
   return (
     <div>
@@ -352,11 +367,7 @@ function Section({
         {title}
       </h3>
       <div className="mt-2 space-y-1 rounded-md border border-border p-3">
-        {arr.length === 0 ? (
-          <div className="text-xs text-muted-foreground">{empty}</div>
-        ) : (
-          children
-        )}
+        {arr.length === 0 ? <div className="text-xs text-muted-foreground">{empty}</div> : children}
       </div>
     </div>
   );

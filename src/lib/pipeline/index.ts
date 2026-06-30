@@ -51,7 +51,7 @@ export async function runPipeline(
   const startedAt = new Date();
   const warnings: string[] = [];
 
-  const step = async <T,>(stage: StageName, fn: () => Promise<T> | T, detail?: string) => {
+  const step = async <T>(stage: StageName, fn: () => Promise<T> | T, detail?: string) => {
     onStage?.({ stage, status: "start", detail });
     const v = await fn();
     onStage?.({ stage, status: "done", detail });

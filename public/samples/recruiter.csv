@@ -1,7 +1,11 @@
-name,email,phone,country,company,title,skills
-Aarav Sharma,aarav.sharma@example.com,+91 98765 43210,India,Stripe Inc.,Senior Software Engineer,"python, react, postgres, k8s, ml"
-priya patel,PRIYA.PATEL@Example.COM,(415) 555-0142,USA,Vercel,Frontend Engineer,"typescript, react, node, css"
-Marcus Chen,marcus.chen@example.com,+44 20 7946 0958,United Kingdom,Palantir Technologies,Forward Deployed Engineer,"python, sql, java"
-Aarav Sharma,aarav.sharma@example.com,9876543210,Bharat,Stripe,Staff Software Engineer,"py, react, postgresql, kubernetes"
-Lin Wei,lin.wei@example,invalid-phone,China,,,
-,jordan.kim@example.com,+1-415-555-0199,US,Linear,Product Engineer,"go, typescript, postgres"
+candidate_id,name,email,phone,country,company,title,skills
+1001,Aarav Sharma,aarav.sharma@example.com,+91 98765 43210,India,Stripe Inc.,Senior Software Engineer,"Python;React;Postgres;k8s;ml"
+1002,Ananya Gupta,ananya.gupta@google.com,+91 91234 56789,India,Google,Software Engineer,"Python;Java;Docker"
+1003,Rohit Verma,rohit@@gmail.com,12345,India,Amazon,Backend Engineer,"Node;Express;Mongo"
+1004,PRIYA SINGH,PRIYA@MAIL.COM,9876543210,INDIA,Adobe Pvt Ltd,Frontend Engineer,"ReactJS;TS;JS"
+1005,Karan Patel,karan.patel@oracle.com,+91 99887 77665,India,Oracle,Data Engineer,"Python;Python;PYTHON;SQL;sql"
+1006,Emily Chen,emily.chen@meta.com,+1 650-555-1234,USA,Meta,Machine Learning Engineer,"Python;TensorFlow;PyTorch"
+1007,David Lee,david.lee@gmail.com,+44 7700 900123,UK,Amazon UK,Cloud Engineer,"AWS;Docker;Kubernetes"
+1008,Sarah Khan,sarah.khan@gmail.com,+91-99999-88888,India,,Data Analyst,"Power BI;SQL;Excel"
+1009,Alex Wilson,alex.wilson@gmail.com,+91 88888 77777,India,Microsoft,Software Engineer,"Java;Spring;Docker"
+1010,John Smith,john.smith@@gmail.com,+91 1234,India,Google,Backend Engineer,"NodeJS;Express;MongoDB"

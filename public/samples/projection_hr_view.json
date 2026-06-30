@@ -1,0 +1,18 @@
+{
+  "includeFields": [
+    "fullName",
+    "email",
+    "phone",
+    "currentCompany",
+    "currentTitle",
+    "skills"
+  ],
+  "excludeFields": [],
+  "rename": {
+    "fullName": "candidateName",
+    "currentCompany": "company",
+    "currentTitle": "designation"
+  },
+  "hideConfidence": true,
+  "hideProvenance": true
+}

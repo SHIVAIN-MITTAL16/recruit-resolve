@@ -14,8 +14,16 @@ export class Logger {
   log(level: LogLevel, message: string) {
     this.entries.push({ level, message, timestamp: new Date().toISOString() });
   }
-  info(m: string) { this.log("INFO", m); }
-  warn(m: string) { this.log("WARNING", m); }
-  error(m: string) { this.log("ERROR", m); }
-  all() { return [...this.entries]; }
+  info(m: string) {
+    this.log("INFO", m);
+  }
+  warn(m: string) {
+    this.log("WARNING", m);
+  }
+  error(m: string) {
+    this.log("ERROR", m);
+  }
+  all() {
+    return [...this.entries];
+  }
 }
