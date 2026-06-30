@@ -329,3 +329,25 @@ The canonical candidate profile remains immutable.
 # License
 
 This project was developed as an engineering demonstrator for deterministic candidate data transformation and explainable data merging.
+
+# Screenshots
+
+## Landing Page
+
+![Landing](screenshots/landing-page.png)
+
+## Overview
+
+![Overview](screenshots/overview.png)
+
+## Canonical JSON
+
+![Canonical](screenshots/canonical-json.png)
+
+## Merge Decisions
+
+![Merge](screenshots/merge-decisions.png)
+
+## Engineering Report
+
+![Report](screenshots/engineering-report.png)
