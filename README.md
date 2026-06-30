@@ -1,147 +1,331 @@
 # Candidate Data Transformer
 
-A deterministic ETL pipeline that ingests a recruiter CSV and a resume PDF and emits a single canonical candidate profile with field-level **provenance**, **confidence**, and **explainable merge decisions**.
+A deterministic ETL pipeline that ingests a recruiter CSV and a resume PDF, merges information from both sources, and produces a single canonical candidate profile with field-level **provenance**, **confidence**, and **explainable merge decisions**.
 
-The pipeline runs entirely in the browser — no upload server, no external API calls — so outputs are reproducible byte-for-byte given the same inputs and projection config.
+The entire pipeline runs locally in the browser—no backend server, database, or external AI APIs are required. Given the same inputs and configuration, the output is deterministic and reproducible.
 
-## Architecture
+---
+
+# Features
+
+- Deterministic ETL pipeline
+- Browser-only execution
+- CSV + Resume PDF ingestion
+- Canonical candidate profile generation
+- Explainable merge decisions
+- Field-level provenance tracking
+- Confidence scoring
+- Runtime projection configuration
+- Engineering report with warnings and validation
+- Resume experience and education extraction
+- Skill normalization and deduplication
+- Regression-tested PDF extraction
+
+---
+
+# Architecture
 
 ```text
-File inputs
-    │
-    ▼
-┌──────────┐    ┌────────────┐    ┌──────────────┐    ┌────────┐
-│  parser  │ -> │ extractor  │ -> │  normalizer  │ -> │ merger │
-└──────────┘    └────────────┘    └──────────────┘    └────┬───┘
-                                                            │
-                                              ┌─────────────┴─────────────┐
-                                              ▼                           ▼
-                                       ┌────────────┐             ┌──────────────┐
-                                       │ confidence │             │  validator   │
-                                       └─────┬──────┘             └──────┬───────┘
-                                             ▼                           ▼
-                                       ┌──────────────────────────────────────┐
-                                       │           projector (config)         │
-                                       └──────────────────────────────────────┘
+                 Recruiter CSV
+                        │
+                        │
+                 Resume PDF
+                        │
+                        ▼
+                  ┌──────────┐
+                  │  Parser  │
+                  └────┬─────┘
+                       │
+                       ▼
+                 ┌────────────┐
+                 │ Extractor  │
+                 └────┬───────┘
+                      │
+                      ▼
+                ┌─────────────┐
+                │ Normalizer  │
+                └────┬────────┘
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │ Merger + Confidence     │
+        └──────────┬──────────────┘
+                   │
+         ┌─────────┴─────────┐
+         ▼                   ▼
+   ┌────────────┐     ┌────────────┐
+   │ Validator  │     │ Projector  │
+   └─────┬──────┘     └─────┬──────┘
+         │                  │
+         └──────────┬───────┘
+                    ▼
+             Candidate UI
 ```
 
-Every module has exactly one responsibility and is a pure function over its inputs.
+Each stage has a single responsibility and is implemented as a deterministic transformation.
+
+---
+
+# Pipeline Modules
 
 | Module | Responsibility |
-| --- | --- |
-| `parser` | Reads CSV/PDF bytes into neutral structures. Never interprets fields. |
-| `extractor` | Pulls candidate fields from each source, wraps them with `FieldEvidence`. |
-| `normalizer` | Standardizes phones (E.164), emails (lowercase), dates (YYYY-MM), country aliases, skill canonical names. Returns the normalized value plus the steps applied. |
-| `merger` | Resolves conflicts with deterministic policy. Emits `MergeDecision`s. |
-| `confidence` | Base confidence per source, plus +bonus on agreement, -penalty on conflict. Folded into merger. |
-| `validator` | Zod schema check; never throws. |
-| `projector` | Applies runtime config (include/exclude/rename, hide confidence/provenance). Canonical model is never mutated. |
+|---------|----------------|
+| **parser** | Reads CSV and PDF files into neutral structures. |
+| **extractor** | Extracts structured candidate information from CSV columns and resume text. |
+| **normalizer** | Standardizes emails, phones, dates, countries, names and skills. |
+| **merger** | Resolves conflicts using deterministic merge rules and computes confidence. |
+| **validator** | Validates the canonical profile using Zod schemas. |
+| **projector** | Applies runtime projection configuration without mutating the canonical model. |
+| **logger** | Records pipeline events for the Engineering Report. |
 
-## Folder structure
+---
 
-```
+# Project Structure
+
+```text
 src/
-  lib/pipeline/
-    types.ts          # Zod schemas + canonical types
-    parser.ts         # CSV + PDF I/O
-    extractor.ts      # CSV column + resume heuristic extraction
-    normalizer.ts     # email/phone/name/country/skill/date normalization
-    merger.ts         # deterministic merge policy
-    confidence.ts     # (fused into merger; see below)
-    validator.ts      # zod validation, non-throwing
-    projector.ts      # runtime view config
-    logger.ts         # leveled in-memory logger
-    index.ts          # orchestrator
-  components/
-    pipeline-progress.tsx
-    results-view.tsx
-  routes/
-    index.tsx         # upload + results UI
+│
+├── components/
+│     pipeline-progress.tsx
+│     results-view.tsx
+│
+├── lib/
+│     pipeline/
+│         parser.ts
+│         extractor.ts
+│         normalizer.ts
+│         merger.ts
+│         validator.ts
+│         projector.ts
+│         logger.ts
+│         index.ts
+│         types.ts
+│
+├── routes/
+│     index.tsx
+│
 tests/
-  normalizer.test.ts
-  merger.test.ts
-  validator_projector.test.ts
-public/samples/
-  recruiter.csv
-  resume_aarav_sharma.pdf
+│     merger.test.ts
+│     normalizer.test.ts
+│     validator_projector.test.ts
+│     pdf_extractor.test.ts
+│
+public/
+└── samples/
+      recruiter.csv
+      resume_aarav_sharma.pdf
+      resume_ananya_gupta.pdf
+      resume_priya_singh.pdf
+      resume_rohit_verma.pdf
+      projection_default.json
+      projection_hr_view.json
 ```
 
-## Merge policy
+---
 
-| Field | Rule |
-| --- | --- |
-| `fullName` | Pick the name with more whitespace-separated tokens; tie → CSV. |
-| `email` | Valid recruiter wins, else valid resume; agreement → CSV + bonus. |
-| `phone` | CSV first; resume on fallback. |
-| `country` | CSV first. |
-| `currentCompany` | If resume has dated experience, prefer resume (newest dated evidence); else CSV. |
-| `currentTitle` | CSV first. |
-| `skills` | Union of canonicalized skills; duplicates removed; cross-source skills get a small confidence bump. |
-| `experience` / `education` | Resume-only. |
+# Merge Policy
 
-Every decision is captured as a `MergeDecision { field, inputs, selected, reason, kind, confidence }` and surfaced in the UI.
+| Field | Merge Rule |
+|---------|------------|
+| Full Name | Prefer the more complete name; tie → recruiter CSV |
+| Email | Prefer valid recruiter email, otherwise valid resume email |
+| Phone | Prefer recruiter phone, otherwise resume phone |
+| Country | Prefer recruiter country |
+| Current Company | Derived from the most recent resume experience when available |
+| Current Title | Uses the deterministic project merge policy |
+| Skills | Union of normalized skills from both sources with duplicate removal |
+| Experience | Resume-derived |
+| Education | Resume-derived |
 
-## Confidence model
+Every merge decision records:
 
-- Base: `recruiter_csv = 0.95–0.98`, `resume_pdf = 0.80–0.90`.
-- Agreement bonus: `+0.02`, capped at `1.0`.
-- Conflict penalty: `-0.10`, floored at `0.0`.
-- For unions (skills), confidence is the mean of the surviving evidence scores.
+- selected value
+- competing evidence
+- merge reason
+- confidence score
+- provenance
 
-No randomness anywhere. Identical inputs → identical confidence values.
+---
 
-## Provenance
+# Confidence Model
 
-For every canonical field we keep:
-- the chosen value and the candidate evidences from each source,
-- the **method** that produced it (e.g. `csv.column:email`, `resume.regex:phone`, `resume.derived:current-company`),
-- the **normalizations** applied in order (e.g. `whitespace:trim`, `case:lower`, `phone:E164`, `country:alias->United States`),
-- the **reason** the chosen value won the merge.
+The confidence score is deterministic.
 
-## Running
+- Recruiter CSV evidence receives higher base confidence.
+- Resume evidence receives slightly lower base confidence.
+- Agreement between sources increases confidence.
+- Conflicting values decrease confidence.
+- Skill unions use the average confidence of surviving evidence.
+
+There is no randomness in confidence calculation.
+
+---
+
+# Provenance
+
+Every canonical field stores:
+
+- selected value
+- originating source
+- extraction method
+- normalization steps
+- raw extracted value
+- confidence score
+
+Example methods include:
+
+- `csv.column:email`
+- `resume.regex:phone`
+- `resume.section:experience`
+- `resume.derived:current-company`
+
+This enables complete traceability from output back to source evidence.
+
+---
+
+# Error Handling
+
+The pipeline is designed to fail gracefully.
+
+The Engineering Report captures issues such as:
+
+- malformed CSV rows
+- invalid emails
+- invalid phone numbers
+- schema validation failures
+- empty resumes
+- duplicate skills
+- missing identity matches
+- merge conflicts
+
+Validation errors never crash the application.
+
+---
+
+# Sample Inputs
+
+The repository includes four representative resumes:
+
+- Aarav Sharma
+- Rohit Verma
+- Priya Singh
+- Ananya Gupta
+
+along with a recruiter CSV for deterministic testing.
+
+---
+
+# Running the Project
+
+Install dependencies:
 
 ```bash
-bun install
-bun run dev          # http://localhost:8080
-bun run build        # production build
-bunx vitest run      # unit tests
+npm install
 ```
 
-Open the app, click **Load sample inputs** in the header, and hit **Transform**.
-
-## Configuration
-
-The Projection Config card lets you, at runtime:
-- whitelist canonical fields,
-- hide `confidence` and `provenance` in the output JSON,
-- (programmatically) rename fields via `ProjectionConfig.rename`.
-
-Changes apply only to the output projection. The canonical model is immutable.
-
-## Error handling
-
-The pipeline never crashes on bad input. It reports issues through the Engineering Report:
-missing or corrupted PDFs, malformed CSV rows, invalid emails / phones, schema validation failures, empty resumes, duplicate skills, conflicting companies. The UI shows them all in the Report tab.
-
-## Testing
-
-`tests/` covers the normalizer (email/phone/name/country/skill/date), the merger
-(agreement bonus, conflict penalty, skill union/dedup, name completeness),
-the validator (accepts good shapes, rejects bad), and the projector (include/rename).
+Start development server:
 
 ```bash
-bunx vitest run
+npm run dev
 ```
 
-## Tradeoffs
+Build production bundle:
 
-- **Browser-only.** Keeps the architecture honest (no upload state, no auth, deterministic). A Python/FastAPI version would need separate infra; the logic would be a one-to-one port.
-- **Resume parsing is heuristic.** A full LLM-backed extractor would be more forgiving but non-deterministic, and we explicitly chose explainability over recall.
-- **No fuzzy matching across CSV rows.** The CSV is assumed to be one candidate per row; identity disambiguation uses the resume's email if present.
+```bash
+npm run build
+```
 
-## Future improvements
+Run tests:
 
-- Stream large CSVs row-by-row instead of buffering.
-- Persist runs and diff two transforms.
-- Pluggable skill registry (load from JSON).
-- Optional LLM-assisted extractor behind a feature flag, with provenance recording the model + prompt hash.
+```bash
+npm test
+```
+
+Open the application and click **Load Sample Inputs** to execute the pipeline with the included sample data.
+
+---
+
+# Testing
+
+The project contains unit and regression tests covering:
+
+- Email normalization
+- Phone normalization
+- Date normalization
+- Country normalization
+- Skill normalization
+- Merge policy
+- Confidence calculation
+- Validator
+- Projector
+- PDF extraction
+- Experience parsing
+- Education parsing
+
+Regression tests verify extraction across all included sample resumes.
+
+---
+
+# Configuration
+
+Projection configuration supports:
+
+- field inclusion/exclusion
+- confidence visibility
+- provenance visibility
+- field renaming
+
+Projection only changes the rendered output.
+
+The canonical candidate profile remains immutable.
+
+---
+
+# Engineering Highlights
+
+- Deterministic ETL architecture
+- Explainable merge decisions
+- Provenance-aware canonical model
+- Browser-only execution
+- Regression-tested parser
+- Runtime configurable projections
+- Structured validation pipeline
+
+---
+
+# Trade-offs
+
+- Resume parsing is heuristic rather than AI-based to preserve determinism and explainability.
+- The pipeline assumes one candidate per recruiter CSV row.
+- OCR for scanned resumes is outside the current project scope.
+- No fuzzy candidate matching is performed across recruiter records.
+
+---
+
+# Future Improvements
+
+- OCR support for scanned PDFs
+- Streaming support for very large CSV files
+- Resume ranking and candidate scoring
+- Pluggable skill taxonomy
+- Multi-language resume support
+- Optional AI-assisted extraction behind a feature flag while preserving provenance
+
+---
+
+# Technologies Used
+
+- TypeScript
+- React
+- Vite
+- Zod
+- pdf-parse / unpdf
+- Vitest
+- Tailwind CSS
+- shadcn/ui
+
+---
+
+# License
+
+This project was developed as an engineering demonstrator for deterministic candidate data transformation and explainable data merging.
