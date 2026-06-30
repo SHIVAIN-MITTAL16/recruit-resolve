@@ -1,0 +1,7 @@
+name,email,phone,country,company,title,skills
+Aarav Sharma,aarav.sharma@example.com,+91 98765 43210,India,Stripe Inc.,Senior Software Engineer,"python, react, postgres, k8s, ml"
+priya patel,PRIYA.PATEL@Example.COM,(415) 555-0142,USA,Vercel,Frontend Engineer,"typescript, react, node, css"
+Marcus Chen,marcus.chen@example.com,+44 20 7946 0958,United Kingdom,Palantir Technologies,Forward Deployed Engineer,"python, sql, java"
+Aarav Sharma,aarav.sharma@example.com,9876543210,Bharat,Stripe,Staff Software Engineer,"py, react, postgresql, kubernetes"
+Lin Wei,lin.wei@example,invalid-phone,China,,,
+,jordan.kim@example.com,+1-415-555-0199,US,Linear,Product Engineer,"go, typescript, postgres"
